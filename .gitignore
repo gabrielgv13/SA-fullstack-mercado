@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# pgembed / PostgreSQL embedded data
+data_mercado/

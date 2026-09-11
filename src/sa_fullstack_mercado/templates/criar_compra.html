@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Criar Compra - Caixa do Mercado{% endblock %}
+
+{% block content %}
+<h2>Criar Nova Compra</h2>
+
+<p>Informe a quantidade desejada para cada produto:</p>
+
+<form method="POST" action="{{ url_for('criar_compra') }}">
+    {% if produtos %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Marca</th>
+                <th>Preço Unitário (R$)</th>
+                <th>Estoque</th>
+                <th>Quantidade a Comprar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            <tr>
+                <td>{{ produto.id }}</td>
+                <td>{{ produto.nome }}</td>
+                <td>{{ produto.marca }}</td>
+                <td>{{ "%.2f"|format(produto.preco_unitario) }}</td>
+                <td>{{ produto.quantidade }}</td>
+                <td>
+                    <input type="number" name="qtd_{{ produto.id }}" value="0" min="0" max="{{ produto.quantidade }}">
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>
+        <button type="submit">Finalizar Compra</button>
+    </p>
+    {% else %}
+    <p>Nenhum produto disponível para compra.</p>
+    {% endif %}
+</form>
+
+<p><a href="{{ url_for('index') }}">Voltar ao Início</a></p>
+{% endblock %}

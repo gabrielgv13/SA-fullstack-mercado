@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Início - Caixa do Mercado{% endblock %}
+
+{% block content %}
+<h2>Produtos Cadastrados</h2>
+
+{% if produtos %}
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Marca</th>
+            <th>Preço Unitário (R$)</th>
+            <th>Quantidade em Estoque</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for produto in produtos %}
+        <tr>
+            <td>{{ produto.id }}</td>
+            <td>{{ produto.nome }}</td>
+            <td>{{ produto.marca }}</td>
+            <td>{{ "%.2f"|format(produto.preco_unitario) }}</td>
+            <td>{{ produto.quantidade }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum produto cadastrado.</p>
+{% endif %}
+
+<hr>
+
+<h2>Últimas Compras</h2>
+
+{% if compras %}
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID da Compra</th>
+            <th>Total (R$)</th>
+            <th>Ação</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for compra in compras %}
+        <tr>
+            <td>{{ compra.id }}</td>
+            <td>{{ "%.2f"|format(compra.total_final) }}</td>
+            <td><a href="{{ url_for('nota_fiscal', compra_id=compra.id) }}">Ver Nota Fiscal</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhuma compra registrada.</p>
+{% endif %}
+{% endblock %}

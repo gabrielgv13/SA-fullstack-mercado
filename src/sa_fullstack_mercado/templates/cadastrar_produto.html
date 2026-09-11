@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastrar Produto - Caixa do Mercado{% endblock %}
+
+{% block content %}
+<h2>Cadastrar Novo Produto</h2>
+
+<form method="POST" action="{{ url_for('cadastrar_produto') }}">
+    <p>
+        <label for="nome">Nome:</label><br>
+        <input type="text" id="nome" name="nome" required>
+    </p>
+    <p>
+        <label for="marca">Marca:</label><br>
+        <input type="text" id="marca" name="marca" required>
+    </p>
+    <p>
+        <label for="preco_unitario">Preço Unitário (R$):</label><br>
+        <input type="number" id="preco_unitario" name="preco_unitario" step="0.01" min="0.01" required>
+    </p>
+    <p>
+        <label for="quantidade">Quantidade em Estoque:</label><br>
+        <input type="number" id="quantidade" name="quantidade" min="0" required>
+    </p>
+    <p>
+        <button type="submit">Cadastrar Produto</button>
+    </p>
+</form>
+
+<p><a href="{{ url_for('index') }}">Voltar ao Início</a></p>
+{% endblock %}
