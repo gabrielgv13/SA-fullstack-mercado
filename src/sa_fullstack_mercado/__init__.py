@@ -1,4 +1,4 @@
-from .app import app  # noqa: F401
+from .aplicacao import app  # noqa: F401
 
 
 def main() -> None:

@@ -1,7 +1,7 @@
 """População inicial do banco de dados via requisições POST aos endpoints."""
 
 
-def seed_data(app, conn):
+def popular_dados_iniciais(app, conn):
     """Popula o banco via POST nos endpoints, simulando uso manual da interface.
 
     Args:

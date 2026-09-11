@@ -40,7 +40,7 @@ class Compra:
         return f"Compra(id={self.id}, total={self.total_final}, itens={len(self.itens)})"
 
 
-def init_schema(conn) -> None:
+def iniciar_tabelas(conn) -> None:
     """Cria as tabelas do banco de dados."""
     with conn.cursor() as cur:
         # Tabela de produtos
