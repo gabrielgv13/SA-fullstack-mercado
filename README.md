@@ -1,36 +1,65 @@
-# SA-fullstack-mercado
+# 🛒 Caixa Eletrônico do Mercado
 
-Prompt:
-Crie um projeto simples de sistema de caixa eletrônico de mercado, utilizando Flask, html puro (sem css), pgembed (fork da biblioteca pgserver, similar ao sqlite, banco de dados integrado) e psycopg como bibliotecas, para instalação das bibliotecas utilize o "uv add". Separe a lógica em 3 arquivos: db.py (funções que manipulam o banco de dados pgembed), app.py (rotas e lógica de extração de dados) e schema.py (classe e objetos + criação de alguns produtos e notas fiscais já feitas). Mais instruções de funcionalides estão localizadas no arquivo README.MD .
+Sistema simples de caixa de supermercado com cadastro de produtos, criação de compras e emissão de nota fiscal.
 
-Funcionalidades:
-Cadastrar Produto (Via formulário) - Requer os campos:
-id - auto increment (sem interação com usuário), nome, marca, preço unitário, quantidade
-Cria um objeto para este produto.
-Cada objeto produto deve possuir os seguintes métodos:
-Alterar preço, Alterar Quantidade, Calculo de preco (recebe uma unidades compradas como parametro, retorna a multiplicação de unidades compradas pelo preço do próprio objeto).
+## Tecnologias
 
-Criar compra:
-Seleciona produtos por lista ou id e então seleciona quantidade de unidades.
-Ao terminar de selecionar produtos, cria um objeto compra
-com os seguintes campos:
-id (autoincrement), dicionário com produtos + quantidade do produto + preço total, total final da compra. Mostra na tela a "nota fiscal".
+- **Flask** — framework web
+- **HTML puro** — templates sem CSS
+- **pgembed** — PostgreSQL embarcado (similar ao SQLite)
+- **psycopg** — driver PostgreSQL
+- **uv** — gerenciador de pacotes e execução
 
-Utilizando o pgembed + psycopg:
+## Estrutura do Projeto
 
-import pgembed
-import psycopg
+```
+src/sa_fullstack_mercado/
+├── __init__.py       # Entry point CLI + expõe a app Flask
+├── app.py            # Rotas e lógica de requisições
+├── db.py             # Funções CRUD e ciclo de vida do pgembed
+├── schema.py         # Classes Produto/Compra + criação de tabelas
+├── population.py     # Seed de dados via POST nos endpoints
+└── templates/
+    ├── base.html              # Layout base com navegação
+    ├── index.html             # Lista de produtos e compras
+    ├── cadastrar_produto.html # Formulário de cadastro
+    ├── criar_compra.html      # Seleção de produtos para compra
+    └── nota_fiscal.html       # Exibição da nota fiscal
+```
 
-server = pgembed.get_server("./meu_banco_dados")
-server.start()
+## Funcionalidades
 
-try:
-    with psycopg.connect(server.get_uri(), autocommit=True) as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT version();")
-            print(cur.fetchone())
-finally:
-    # Garante que o banco fecha mesmo se ocorrer um erro acima
-    server.stop()
+### Cadastrar Produto
+Formulário com os campos: **nome**, **marca**, **preço unitário** e **quantidade**. O `id` é gerado automaticamente (auto-increment).
 
-pgembed.get_server("./pasta"): Inicializa o ciclo de vida. Se o diretório estiver vazio, ele roda o initdb do PostgreSQL por baixo dos panos e escolhe uma porta de rede aleatória que esteja livre no seu sistema operacional.server.get_uri(): Retorna a string de conexão exata (geralmente algo como postgresql://postgres@127.0.0.1:PORTA/postgres), permitindo que você conecte qualquer driver de mercado, como o psycopg.server.stop(): Finaliza os processos em segundo plano do PostgreSQL de maneira limpa.
+A classe `Produto` possui os métodos:
+- `alterar_preco(novo_preco)` — altera o preço unitário
+- `alterar_quantidade(nova_qtd)` — altera o estoque
+- `calcular_preco(unidades)` — retorna `unidades × preço_unitário`
+
+### Criar Compra
+Exibe todos os produtos disponíveis com campos de quantidade. Ao finalizar:
+- Calcula subtotais usando `Produto.calcular_preco()`
+- Deduz o estoque automaticamente
+- Gera uma nota fiscal com itens detalhados e total final
+
+A classe `Compra` armazena: `id` (auto-increment), dicionário de itens (produto, quantidade, preço unitário, subtotal) e total final.
+
+## Como Executar
+
+```bash
+# Instalar dependências
+uv sync
+
+# Rodar a aplicação
+uv run flask --app sa_fullstack_mercado.app run
+
+# Ou via entry point
+uv run sa-fullstack-mercado
+```
+
+Acesse `http://localhost:5000` no navegador.
+
+## Dados Iniciais
+
+Na primeira execução, o sistema popula automaticamente o banco com **5 produtos** e **2 notas fiscais** de exemplo, simulando requisições POST pelos próprios endpoints da aplicação. Os dados persistem no diretório `data_mercado/` entre reinicializações.
