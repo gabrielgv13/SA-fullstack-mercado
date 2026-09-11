@@ -123,8 +123,6 @@ def listar_compras(conexao) -> list[Compra]:
 def listar_compras(conexao) -> list[Compra]:
     """Retorna todas as compras como lista de objetos Compra."""
     with conexao.cursor() as cur:
-        # TODO: Selecione todas as compras da tabela 'compras', ordenadas por id.
-        #       Retorne as colunas: id, itens, total_final.
-        cur.execute("""   """)
+        cur.execute("SELECT id, itens, total_final FROM compras ORDER BY id;")
         linhas = cur.fetchall()
         return [Compra(id=linha[0], itens=linha[1], total_final=float(linha[2])) for linha in linhas]
