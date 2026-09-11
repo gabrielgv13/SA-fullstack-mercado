@@ -44,14 +44,8 @@ def cadastrar_produto():
         preco_unitario = float(request.form["preco_unitario"])  # tipo: float
         quantidade = int(request.form["quantidade"])            # tipo: int
 
-        # TODO: Crie um objeto Produto com os dados recebidos.
-        #       Use id=0 pois o banco gera o ID automaticamente.
-        #       Exemplo: Produto(id=0, nome=nome, marca=marca, ...)
-        novo_produto = None  # Substitua None pela criação do objeto Produto
-
-        # TODO: Salve o produto no banco usando a função inserir_produto
-        #       do módulo banco_de_dados. Passe a conexão (_conexao) e os
-        #       atributos do objeto criado.
+        produto = Produto(id=0, nome=nome, marca=marca, preco_unitario=preco_unitario, quantidade=quantidade)
+        banco_de_dados.inserir_produto(_conexao, produto.nome, produto.marca, produto.preco_unitario, produto.quantidade)
 
         return redirect(url_for("pagina_inicial"))
 
@@ -71,26 +65,22 @@ def criar_compra():
             chave_quantidade = f"qtd_{produto.id}"
             quantidade = int(request.form.get(chave_quantidade, 0))  # tipo: int
 
-            # TODO: Se a quantidade for maior que zero:
-            #   1. Calcule o subtotal chamando produto.calcular_preco(quantidade)
-            #      O resultado é do tipo float.
-            #   2. Adicione ao dicionário 'itens' uma entrada com:
-            #      - Chave: str(produto.id)
-            #      - Valor: um dicionário com as chaves "nome", "quantidade",
-            #        "preco_unitario" e "subtotal"
-            #   3. Some o subtotal à variável total_final
-            #   4. Calcule o novo estoque: produto.quantidade - quantidade
-            #      Use max(novo_estoque, 0) para não ficar negativo.
-            #      Atualize no banco chamando:
-            #      banco_de_dados.atualizar_quantidade(_conexao, produto.id, novo_estoque)
+            if quantidade > 0:
+                subtotal = produto.calcular_preco(quantidade)
+                itens[str(produto.id)] = {
+                    "nome": produto.nome,
+                    "quantidade": quantidade,
+                    "preco_unitario": produto.preco_unitario,
+                    "subtotal": subtotal,
+                }
+                total_final += subtotal
 
-            pass  # Remova esta linha após implementar o código acima
+                # Atualizar estoque
+                novo_estoque = produto.quantidade - quantidade
+                banco_de_dados.atualizar_quantidade(_conexao, produto.id, max(novo_estoque, 0))
 
-        # TODO: Após o loop, se o dicionário 'itens' não estiver vazio:
-        #   Insira a compra no banco chamando:
-        #   banco_de_dados.inserir_compra(_conexao, itens, total_final)
-        #   A função retorna o ID da compra criada.
-        compra_id = None  # Substitua None pela chamada de inserir_compra
+        if itens:
+            compra_id = banco_de_dados.inserir_compra(_conexao, itens, total_final)
 
         if itens:
             return redirect(url_for("nota_fiscal", compra_id=compra_id))

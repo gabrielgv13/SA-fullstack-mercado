@@ -49,20 +49,17 @@ def obter_conexao(servidor: PostgresServer):
 def inserir_produto(conexao, nome: str, marca: str, preco_unitario: float, quantidade: int) -> int:
     """Insere um novo produto e retorna o ID gerado."""
     with conexao.cursor() as cur:
-        # TODO: Insira um novo produto na tabela 'produtos' com os campos:
-        #       nome, marca, preco_unitario e quantidade.
-        #       Use RETURNING id para retornar o ID gerado automaticamente.
-        #       Os parâmetros devem ser passados como tupla: (nome, marca, preco_unitario, quantidade)
-        cur.execute("""   """)
+        cur.execute(
+            "INSERT INTO produtos (nome, marca, preco_unitario, quantidade) VALUES (%s, %s, %s, %s) RETURNING id;",
+            (nome, marca, preco_unitario, quantidade),
+        )
         return cur.fetchone()[0]
 
 
 def listar_produtos(conexao) -> list[Produto]:
     """Retorna todos os produtos como lista de objetos Produto."""
     with conexao.cursor() as cur:
-        # TODO: Selecione todos os produtos da tabela 'produtos', ordenados por id.
-        #       Retorne as colunas: id, nome, marca, preco_unitario, quantidade.
-        cur.execute("""   """)
+        cur.execute("SELECT id, nome, marca, preco_unitario, quantidade FROM produtos ORDER BY id;")
         linhas = cur.fetchall()
         return [Produto(id=linha[0], nome=linha[1], marca=linha[2], preco_unitario=float(linha[3]), quantidade=linha[4]) for linha in linhas]
 
@@ -70,10 +67,7 @@ def listar_produtos(conexao) -> list[Produto]:
 def buscar_produto(conexao, produto_id: int) -> Produto | None:
     """Busca um produto por ID. Retorna None se não encontrado."""
     with conexao.cursor() as cur:
-        # TODO: Busque um produto pelo seu ID na tabela 'produtos'.
-        #       Retorne as colunas: id, nome, marca, preco_unitario, quantidade.
-        #       Filtre usando WHERE id = %s passando (produto_id,) como parâmetro.
-        cur.execute("""   """)
+        cur.execute("SELECT id, nome, marca, preco_unitario, quantidade FROM produtos WHERE id = %s;", (produto_id,))
         linha = cur.fetchone()
         if linha is None:
             return None
@@ -83,19 +77,13 @@ def buscar_produto(conexao, produto_id: int) -> Produto | None:
 def atualizar_preco(conexao, produto_id: int, novo_preco: float) -> None:
     """Atualiza o preço unitário de um produto."""
     with conexao.cursor() as cur:
-        # TODO: Atualize o preco_unitario de um produto na tabela 'produtos'.
-        #       Filtre pelo id do produto.
-        #       Parâmetros: (novo_preco, produto_id)
-        cur.execute("""   """)
+        cur.execute("UPDATE produtos SET preco_unitario = %s WHERE id = %s;", (novo_preco, produto_id))
 
 
 def atualizar_quantidade(conexao, produto_id: int, nova_quantidade: int) -> None:
     """Atualiza a quantidade em estoque de um produto."""
     with conexao.cursor() as cur:
-        # TODO: Atualize a quantidade de um produto na tabela 'produtos'.
-        #       Filtre pelo id do produto.
-        #       Parâmetros: (nova_quantidade, produto_id)
-        cur.execute("""   """)
+        cur.execute("UPDATE produtos SET quantidade = %s WHERE id = %s;", (nova_quantidade, produto_id))
 
 
 # --- CRUD Compras ---
@@ -107,25 +95,29 @@ def inserir_compra(conexao, itens: dict, total_final: float) -> int:
     """
     itens_json = json.dumps(itens)
     with conexao.cursor() as cur:
-        # TODO: Insira uma nova compra na tabela 'compras' com os campos:
-        #       itens (JSONB) e total_final.
-        #       Use RETURNING id para retornar o ID gerado automaticamente.
-        #       Parâmetros: (itens_json, total_final)
-        cur.execute("""   """)
+        cur.execute(
+            "INSERT INTO compras (itens, total_final) VALUES (%s, %s) RETURNING id;",
+            (itens_json, total_final),
+        )
         return cur.fetchone()[0]
 
 
 def buscar_compra(conexao, compra_id: int) -> Compra | None:
     """Busca uma compra por ID. Retorna None se não encontrada."""
     with conexao.cursor() as cur:
-        # TODO: Busque uma compra pelo seu ID na tabela 'compras'.
-        #       Retorne as colunas: id, itens, total_final.
-        #       Filtre usando WHERE id = %s passando (compra_id,) como parâmetro.
-        cur.execute("""   """)
+        cur.execute("SELECT id, itens, total_final FROM compras WHERE id = %s;", (compra_id,))
         linha = cur.fetchone()
         if linha is None:
             return None
         return Compra(id=linha[0], itens=linha[1], total_final=float(linha[2]))
+
+
+def listar_compras(conexao) -> list[Compra]:
+    """Retorna todas as compras como lista de objetos Compra."""
+    with conexao.cursor() as cur:
+        cur.execute("SELECT id, itens, total_final FROM compras ORDER BY id;")
+        linhas = cur.fetchall()
+        return [Compra(id=linha[0], itens=linha[1], total_final=float(linha[2])) for linha in linhas]
 
 
 def listar_compras(conexao) -> list[Compra]:
