@@ -1,32 +1,64 @@
 {% extends "base.html" %}
 
-{% block title %}Nota Fiscal #{{ compra.id }} - Caixa do Mercado{% endblock %}
+{% block title %}Nota Fiscal #{{ compra.id }} - Mercado Plus{% endblock %}
 
 {% block content %}
-<h2>Nota Fiscal #{{ compra.id }}</h2>
+<h1 class="page-title"><i class="bi bi-receipt"></i>Nota Fiscal #{{ compra.id }}</h1>
 
-<table border="1">
-    <thead>
-        <tr>
-            <th>Produto</th>
-            <th>Quantidade</th>
-            <th>Preço Unitário (R$)</th>
-            <th>Subtotal (R$)</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for produto_id, item in compra.itens.items() %}
-        <tr>
-            <td>{{ item.nome }}</td>
-            <td>{{ item.quantidade }}</td>
-            <td>{{ "%.2f"|format(item.preco_unitario) }}</td>
-            <td>{{ "%.2f"|format(item.subtotal) }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success">
+                <i class="bi bi-cart-check"></i> Resumo da Compra
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th><i class="bi bi-tag"></i> Produto</th>
+                                <th><i class="bi bi-stack"></i> Quantidade</th>
+                                <th><i class="bi bi-currency-dollar"></i> Preço Unit.</th>
+                                <th><i class="bi bi-calculator"></i> Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for produto_id, item in compra.itens.items() %}
+                            <tr>
+                                <td><strong>{{ item.nome }}</strong></td>
+                                <td><span class="badge bg-info">{{ item.quantidade }} un</span></td>
+                                <td class="price">R$ {{ "%.2f"|format(item.preco_unitario) }}</td>
+                                <td class="price"><strong>R$ {{ "%.2f"|format(item.subtotal) }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-success">
+                                <td colspan="3" class="text-end"><strong>Total Final:</strong></td>
+                                <td class="price"><h4 class="mb-0">R$ {{ "%.2f"|format(compra.total_final) }}</h4></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
 
-<h3>Total Final: R$ {{ "%.2f"|format(compra.total_final) }}</h3>
+                <hr class="my-4">
 
-<p><a href="{{ url_for('pagina_inicial') }}">Voltar ao Início</a></p>
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('pagina_inicial') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-house"></i> Voltar ao Início
+                    </a>
+                    <a href="{{ url_for('criar_compra') }}" class="btn btn-success">
+                        <i class="bi bi-cart-plus"></i> Nova Compra
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="text-muted mb-0">
+                <i class="bi bi-cart4"></i> Obrigado pela compra no Mercado Plus!
+            </p>
+        </div>
+    </div>
+</div>
 {% endblock %}

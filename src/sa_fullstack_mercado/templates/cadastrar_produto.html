@@ -1,31 +1,69 @@
 {% extends "base.html" %}
 
-{% block title %}Cadastrar Produto - Caixa do Mercado{% endblock %}
+{% block title %}Cadastrar Produto - Mercado Plus{% endblock %}
 
 {% block content %}
-<h2>Cadastrar Novo Produto</h2>
+<h1 class="page-title"><i class="bi bi-plus-circle"></i>Cadastrar Novo Produto</h1>
 
-<form method="POST" action="{{ url_for('cadastrar_produto') }}">
-    <p>
-        <label for="nome">Nome:</label><br>
-        <input type="text" id="nome" name="nome" required>
-    </p>
-    <p>
-        <label for="marca">Marca:</label><br>
-        <input type="text" id="marca" name="marca" required>
-    </p>
-    <p>
-        <label for="preco_unitario">Preço Unitário (R$):</label><br>
-        <input type="number" id="preco_unitario" name="preco_unitario" step="0.01" min="0.01" required>
-    </p>
-    <p>
-        <label for="quantidade">Quantidade em Estoque:</label><br>
-        <input type="number" id="quantidade" name="quantidade" min="0" required>
-    </p>
-    <p>
-        <button type="submit">Cadastrar Produto</button>
-    </p>
-</form>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-box-seam"></i> Dados do Produto
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('cadastrar_produto') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nome" class="form-label">
+                                <i class="bi bi-tag"></i> Nome do Produto
+                            </label>
+                            <input type="text" class="form-control" id="nome" name="nome" 
+                                   placeholder="Ex: Arroz integral" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="marca" class="form-label">
+                                <i class="bi bi-briefcase"></i> Marca
+                            </label>
+                            <input type="text" class="form-control" id="marca" name="marca" 
+                                   placeholder="Ex: Marca do Produto" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="preco_unitario" class="form-label">
+                                <i class="bi bi-currency-dollar"></i> Preço Unitário (R$)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="number" class="form-control" id="preco_unitario" 
+                                       name="preco_unitario" step="0.01" min="0.01" 
+                                       placeholder="0,00" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="quantidade" class="form-label">
+                                <i class="bi bi-stack"></i> Quantidade em Estoque
+                            </label>
+                            <input type="number" class="form-control" id="quantidade" 
+                                   name="quantidade" min="0" placeholder="0" required>
+                        </div>
+                    </div>
 
-<p><a href="{{ url_for('pagina_inicial') }}">Voltar ao Início</a></p>
+                    <hr class="my-4">
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('pagina_inicial') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Voltar ao Início
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Cadastrar Produto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
