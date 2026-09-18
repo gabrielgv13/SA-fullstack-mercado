@@ -2,10 +2,13 @@
 
 import json
 import os
+import subprocess
+import time
 from pathlib import Path
 
 import pgembed
 from pgembed.postgres_server import PostgresServer
+import psutil
 import psycopg
 
 from .modelos import Produto, Compra
@@ -13,6 +16,63 @@ from .modelos import Produto, Compra
 # Singleton do servidor pgembed
 _servidor = None
 _DIRETORIO_DADOS = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))) / "data_mercado"
+
+
+def _status_postmaster() -> str | None:
+    """Lê o status (8ª linha) do postmaster.pid, ou None se não existir."""
+    pid_file = _DIRETORIO_DADOS / "postmaster.pid"
+    try:
+        linhas = pid_file.read_text().splitlines()
+        if len(linhas) >= 8:
+            return linhas[7].strip()
+    except OSError:
+        pass
+    return None
+
+
+def _aguardar_servidor_pronto(timeout: float = 90.0) -> None:
+    """Aguarda o servidor PostgreSQL ficar 'ready' se ele estiver rodando mas
+    ainda não pronto (ex.: após um backend ser morto por CTRL_C_EVENT no Windows).
+
+    O pgembed lança AssertionError se encontrar um postmaster rodando com
+    status != 'ready', então esperamos aqui antes de chamá-lo.
+    """
+    pid_file = _DIRETORIO_DADOS / "postmaster.pid"
+    if not pid_file.exists():
+        return
+
+    try:
+        pid = int(pid_file.read_text().splitlines()[0].strip())
+    except (OSError, ValueError, IndexError):
+        return
+
+    if _status_postmaster() == "ready" or not psutil.pid_exists(pid):
+        return
+
+    print("[banco_de_dados] Servidor PostgreSQL ainda não pronto; aguardando...")
+    inicio = time.time()
+    while time.time() - inicio < timeout:
+        time.sleep(1.0)
+        if _status_postmaster() == "ready":
+            print("[banco_de_dados] Servidor PostgreSQL pronto.")
+            return
+        if not psutil.pid_exists(pid):
+            return  # processo morreu; o pgembed vai iniciar do zero
+
+    # Timeout: derruba o servidor para o pgembed reiniciar de forma limpa.
+    print("[banco_de_dados] Servidor não ficou pronto; reiniciando...")
+    try:
+        from pgembed._commands import POSTGRES_BIN_PATH
+
+        pg_ctl = POSTGRES_BIN_PATH / ("pg_ctl.exe" if os.name == "nt" else "pg_ctl")
+        subprocess.run(
+            [str(pg_ctl), "-D", str(_DIRETORIO_DADOS), "-w", "stop"],
+            timeout=30,
+            capture_output=True,
+            text=True,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"[banco_de_dados] Falha ao parar servidor: {exc}")
 
 
 def obter_servidor_banco() -> PostgresServer:
@@ -25,6 +85,7 @@ def obter_servidor_banco() -> PostgresServer:
 
 def iniciar_servidor() -> PostgresServer:
     """Inicializa o pgdata e inicia o servidor pgembed."""
+    _aguardar_servidor_pronto()
     servidor = obter_servidor_banco()
     servidor.ensure_pgdata_inited()
     servidor.ensure_postgres_running()
